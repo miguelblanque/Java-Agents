@@ -18,10 +18,15 @@ public class Cliente extends Agent {
 
     public void setup() {
         libros = new HashMap<String, Integer>();
+        pujas = new HashMap<String, Integer>();
         libros.put("pfd", 20);
+        
+        System.out.println("Libros añadidos");
 
         addBehaviour(new Buscador());
-        addBehaviour(new TickerBehaviour(this, 30000) {
+        System.out.println("Añadido primer comportamiento");
+        
+        addBehaviour(new TickerBehaviour(this, 10000) {
             protected void onTick() {
                 MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
                 boolean bucle = true;
@@ -33,18 +38,25 @@ public class Cliente extends Agent {
                         libros.remove(libro);
                         System.out.println("El siguiente libro está disponible: "+libro);
                     } else {
+                        System.out.println("Búsqueda de libros finalizada");
                         bucle = false;
                     }
                 }
                 for (String key : libros.keySet()) {
-                    ACLMessage busqueda = new ACLMessage(jade.lang.acl.ACLMessage.INFORM);
+                    ACLMessage busqueda = new ACLMessage(jade.lang.acl.ACLMessage.REQUEST);
                     busqueda.addReceiver(vendedor);
                     busqueda.setContent(key);
+                    myAgent.send(busqueda);
+                    System.out.println("Mensaje enviado para el libro: "+key);
                 }
-
+                System.out.println("Mensajes de petición pedidos");
             }
         });
-        doDelete();
+        System.out.println("Vamos a hacer el doDelete");
+    }
+    
+    public void takeDown() {
+        System.out.println("AdiosCliente");
     }
 
     public class Buscador extends OneShotBehaviour {
@@ -57,9 +69,11 @@ public class Cliente extends Agent {
             try {
                 DFAgentDescription[] result = DFService.search(myAgent, template);
                 vendedor = result[0].getName();
+                System.out.println("Try realizado");
             } catch (FIPAException fe) {
                 fe.printStackTrace();
             }
+            System.out.println("Vendedor encontrado");
         }
     }
 }

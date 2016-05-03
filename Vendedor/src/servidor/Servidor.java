@@ -14,9 +14,10 @@ import java.util.HashMap;
 public class Servidor extends Agent {
     public HashMap<String, Puja> libros;
 
-    public void setup() {
+    protected void setup() {
+        System.out.println("Empezando el servidor");
         libros = new HashMap<String,Puja>();
-
+        
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
@@ -30,14 +31,20 @@ public class Servidor extends Agent {
         }
 
         libros.put("pfd", new Puja("pfd", 10));
+        
+        System.out.println("Servidor subido a páginas amarillas");
 
         addBehaviour(new RespuestaConsulta());
+        System.out.println("Añadido comportamiento");
+        
         addBehaviour(new TickerBehaviour(this, 10000) {
             protected void onTick() {
+                System.out.println("Empezamos un tick");
                 boolean bucle = true;
                 for (String key : libros.keySet()) {
                     libros.get(key).participantes = new ArrayList<AID>();
                 }
+                System.out.println("ArrayList creados");
 
                 MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REJECT_PROPOSAL);
                 while (bucle) {
@@ -48,6 +55,7 @@ public class Servidor extends Agent {
                         aux.participantes.remove(msg.getSender());
                         aux.ganador=aux.participantes.get(0);
                     } else {
+                        System.out.println("Bucle de bajas acabado");
                         bucle = false;
                     }
                 }
@@ -78,6 +86,7 @@ public class Servidor extends Agent {
                             myAgent.send(respuesta);
                         }
                     } else {
+                        System.out.println("Bucle de proposiciones acabado");
                         bucle = false;
                     }
                 }
@@ -88,33 +97,40 @@ public class Servidor extends Agent {
                         ganador.addReceiver(libros.get(key).ganador);
                         ganador.setContent(libros.get(key).nombre);
                         libros.remove(key);
+                        myAgent.send(ganador);
                     } else {
                         ACLMessage seguimos = new ACLMessage(ACLMessage.CFP);
                         seguimos.addReceiver(libros.get(key).ganador);
                         seguimos.setContent(libros.get(key).nombre + ";"
                                 + String.valueOf(libros.get(key).precio));
+                        myAgent.send(seguimos);
                     }
                 }
+                System.out.println("Mensajes a ganadores mandados");
             }
         });
-        
-        doDelete();
+        System.out.println("Vamos a hacer el doDelete");
     }
 
-    public void takeDown() {
+    protected void takeDown() {
+        System.out.println("Voy a hacer el takedown");
         try {
             DFService.deregister(this);
         } catch (FIPAException fe) {
             fe.printStackTrace();
         }
-        System.out.println("Adios");
+        System.out.println("Voy a hacer el takedown");
+        System.out.println("AdiosServidor");
     }
 
     public class RespuestaConsulta extends CyclicBehaviour {
 
         public void action() {
+            System.out.println("Hola");
             MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
+            System.out.println("Hola");
             ACLMessage msg = myAgent.receive(mt);
+            System.out.println("Hola");
             if (msg != null) {
                 String libro = msg.getContent();
                 ACLMessage reply = msg.createReply();
