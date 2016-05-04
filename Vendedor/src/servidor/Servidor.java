@@ -37,14 +37,13 @@ public class Servidor extends Agent {
         addBehaviour(new RespuestaConsulta());
         System.out.println("Añadido comportamiento");
         
-        addBehaviour(new TickerBehaviour(this, 10000) {
+        addBehaviour(new TickerBehaviour(this, 30000) {
             protected void onTick() {
                 System.out.println("Empezamos un tick");
                 boolean bucle = true;
                 for (String key : libros.keySet()) {
                     libros.get(key).participantes = new ArrayList<AID>();
                 }
-                System.out.println("ArrayList creados");
 
                 MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REJECT_PROPOSAL);
                 while (bucle) {
@@ -55,7 +54,6 @@ public class Servidor extends Agent {
                         aux.participantes.remove(msg.getSender());
                         aux.ganador=aux.participantes.get(0);
                     } else {
-                        System.out.println("Bucle de bajas acabado");
                         bucle = false;
                     }
                 }
@@ -74,6 +72,7 @@ public class Servidor extends Agent {
                             if (aux.participantes.size() == 0) {
                                 aux.ganador = msg.getSender();
                             } else {
+                                aux.precio=nVal;
                                 ACLMessage respuesta = msg.createReply();
                                 respuesta.setPerformative(ACLMessage.CFP);
                                 respuesta.setContent(contenido[0] + ";" + String.valueOf(nVal));
@@ -83,10 +82,10 @@ public class Servidor extends Agent {
                         } else {
                             ACLMessage respuesta = msg.createReply();
                             respuesta.setPerformative(ACLMessage.REJECT_PROPOSAL);
+                            respuesta.setContent(contenido[0]);
                             myAgent.send(respuesta);
                         }
                     } else {
-                        System.out.println("Bucle de proposiciones acabado");
                         bucle = false;
                     }
                 }
@@ -98,6 +97,7 @@ public class Servidor extends Agent {
                         ganador.setContent(libros.get(key).nombre);
                         libros.remove(key);
                         myAgent.send(ganador);
+                        System.out.println("Mensajes a ganador mandado");
                     } else {
                         ACLMessage seguimos = new ACLMessage(ACLMessage.CFP);
                         seguimos.addReceiver(libros.get(key).ganador);
@@ -106,7 +106,6 @@ public class Servidor extends Agent {
                         myAgent.send(seguimos);
                     }
                 }
-                System.out.println("Mensajes a ganadores mandados");
             }
         });
         System.out.println("Vamos a hacer el doDelete");
@@ -119,18 +118,14 @@ public class Servidor extends Agent {
         } catch (FIPAException fe) {
             fe.printStackTrace();
         }
-        System.out.println("Voy a hacer el takedown");
         System.out.println("AdiosServidor");
     }
 
     public class RespuestaConsulta extends CyclicBehaviour {
 
         public void action() {
-            System.out.println("Hola");
             MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
-            System.out.println("Hola");
             ACLMessage msg = myAgent.receive(mt);
-            System.out.println("Hola");
             if (msg != null) {
                 String libro = msg.getContent();
                 ACLMessage reply = msg.createReply();
@@ -144,6 +139,7 @@ public class Servidor extends Agent {
                     reply.setContent("NULL");
                 }
                 myAgent.send(reply);
+                System.out.println("Se ha atendido a una consulta");
             } else {
                 block();
             }

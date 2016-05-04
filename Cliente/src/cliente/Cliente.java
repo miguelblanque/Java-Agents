@@ -24,15 +24,37 @@ public class Cliente extends Agent {
         libros.put("pfd", 20);
         noDisponibles.put("pfd", 20);
 
-        System.out.println("Libros añadidos");
-
         addBehaviour(new Buscador());
         System.out.println("Añadido primer comportamiento");
 
-        addBehaviour(new TickerBehaviour(this, 10000) {
+        addBehaviour(new TickerBehaviour(this, 30000) {
             protected void onTick() {
-                MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
+                MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REJECT_PROPOSAL);
                 boolean bucle = true;
+                while(bucle){
+                    ACLMessage msg = myAgent.receive(mt);
+                    if(msg!=null){
+                        pujas.remove(msg.getContent());
+                        System.out.println("\t\t\tNo he ganado el libro: "+msg.getContent());
+                    }else{
+                        bucle=false;
+                    }
+                }
+                bucle=true;
+                
+                mt = MessageTemplate.MatchPerformative(ACLMessage.INFORM);
+                while(bucle){
+                    ACLMessage msg = myAgent.receive(mt);
+                    if(msg != null){
+                        pujas.remove(msg.getContent());
+                        System.out.println("\t\t\tHe ganado el libro: "+msg.getContent());
+                    }else{
+                        bucle=false;
+                    }
+                }
+                bucle=true;
+                
+                mt = MessageTemplate.MatchPerformative(ACLMessage.CFP);
                 while (bucle) {
                     ACLMessage msg = myAgent.receive(mt);
                     if (msg != null) {
@@ -43,9 +65,8 @@ public class Cliente extends Agent {
                             pujas.put(contenido[0], Integer.parseInt(contenido[1]));
                             noDisponibles.remove(contenido[0]);
                         }
-                        System.out.println("El siguiente libro está disponible: " + contenido[0]);
+                        System.out.println("\t\t\tEl siguiente libro está disponible: " + contenido[0]);
                     } else {
-                        System.out.println("Búsqueda de libros finalizada");
                         bucle = false;
                     }
                 }
@@ -59,14 +80,13 @@ public class Cliente extends Agent {
                     }
                 }
 
-                for (String key : libros.keySet()) {
+                for (String key : noDisponibles.keySet()) {
                     ACLMessage busqueda = new ACLMessage(jade.lang.acl.ACLMessage.REQUEST);
                     busqueda.addReceiver(vendedor);
                     busqueda.setContent(key);
                     myAgent.send(busqueda);
-                    System.out.println("Mensaje enviado para el libro: " + key);
+                    System.out.println("\t\t\tMensaje enviado para el libro: " + key);
                 }
-                System.out.println("Mensajes de petición pedidos");
             }
         });
         System.out.println("Vamos a hacer el doDelete");
@@ -86,7 +106,6 @@ public class Cliente extends Agent {
             try {
                 DFAgentDescription[] result = DFService.search(myAgent, template);
                 vendedor = result[0].getName();
-                System.out.println("Try realizado");
             } catch (FIPAException fe) {
                 fe.printStackTrace();
             }
