@@ -138,7 +138,7 @@ public class Servidor extends Agent {
                 Puja subasta = libros.get(libro);
                 if (subasta != null) {
                     reply.setPerformative(ACLMessage.CFP);
-                    reply.setContent(String.valueOf(subasta.precio));
+                    reply.setContent(subasta.nombre+";"+String.valueOf(subasta.precio));
                 } else {
                     reply.setPerformative(ACLMessage.REFUSE);
                     reply.setContent("NULL");
