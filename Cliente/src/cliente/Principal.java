@@ -36,6 +36,11 @@ public class Principal extends javax.swing.JFrame {
         });
 
         jTextField1.setText("Precio Máximo");
+        jTextField1.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                jTextField1FocusGained(evt);
+            }
+        });
         jTextField1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jTextField1ActionPerformed(evt);
@@ -47,6 +52,11 @@ public class Principal extends javax.swing.JFrame {
         jLabel2.setText("Libro a comprar:");
 
         jTextField2.setText("Libro a comprar");
+        jTextField2.addFocusListener(new java.awt.event.FocusAdapter() {
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                jTextField2FocusGained(evt);
+            }
+        });
         jTextField2.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jTextField2ActionPerformed(evt);
@@ -116,6 +126,14 @@ public class Principal extends javax.swing.JFrame {
         this.superior.noDisponibles.put(libro, cantidad);
         jTextArea1.append(libro+"-Buscando\n");
     }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void jTextField2FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTextField2FocusGained
+        jTextField2.setText("");
+    }//GEN-LAST:event_jTextField2FocusGained
+
+    private void jTextField1FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTextField1FocusGained
+        jTextField2.setText("");
+    }//GEN-LAST:event_jTextField1FocusGained
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JButton jButton1;

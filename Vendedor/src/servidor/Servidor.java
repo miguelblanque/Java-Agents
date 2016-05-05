@@ -30,14 +30,14 @@ public class Servidor extends Agent {
             fe.printStackTrace();
         }
 
-        libros.put("pfd", new Puja("pfd", 10));
+        libros.put("pfd", new Puja("pfd", 5));
         
         System.out.println("Servidor subido a páginas amarillas");
 
         addBehaviour(new RespuestaConsulta());
         System.out.println("Añadido comportamiento");
         
-        addBehaviour(new TickerBehaviour(this, 30000) {
+        addBehaviour(new TickerBehaviour(this, 10000) {
             protected void onTick() {
                 System.out.println("Empezamos un tick");
                 boolean bucle = true;
