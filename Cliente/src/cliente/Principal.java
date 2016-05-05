@@ -23,6 +23,9 @@ public class Principal extends javax.swing.JFrame {
         jTextField2 = new javax.swing.JTextField();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextArea1 = new javax.swing.JTextArea();
+        jLabel3 = new javax.swing.JLabel();
+        jTextField4 = new javax.swing.JTextField();
+        jButton2 = new javax.swing.JButton();
 
         jTextField3.setText("jTextField3");
 
@@ -35,37 +38,22 @@ public class Principal extends javax.swing.JFrame {
             }
         });
 
-        jTextField1.setText("Precio Máximo");
-        jTextField1.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                jTextField1FocusGained(evt);
-            }
-        });
-        jTextField1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField1ActionPerformed(evt);
-            }
-        });
-
         jLabel1.setText("Precio Máximo:");
 
         jLabel2.setText("Libro a comprar:");
 
-        jTextField2.setText("Libro a comprar");
-        jTextField2.addFocusListener(new java.awt.event.FocusAdapter() {
-            public void focusGained(java.awt.event.FocusEvent evt) {
-                jTextField2FocusGained(evt);
-            }
-        });
-        jTextField2.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jTextField2ActionPerformed(evt);
-            }
-        });
-
         jTextArea1.setColumns(20);
         jTextArea1.setRows(5);
         jScrollPane1.setViewportView(jTextArea1);
+
+        jLabel3.setText("Libro a salir de la puja:");
+
+        jButton2.setText("Salir de la puja");
+        jButton2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton2ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -84,8 +72,20 @@ public class Principal extends javax.swing.JFrame {
                         .addGap(67, 67, 67)
                         .addComponent(jButton1)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1)
-                .addContainerGap())
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel3)
+                                .addGap(0, 26, Short.MAX_VALUE))
+                            .addComponent(jTextField4))
+                        .addContainerGap())
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jButton2)
+                        .addGap(32, 32, 32))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -96,28 +96,28 @@ public class Principal extends javax.swing.JFrame {
                         .addComponent(jScrollPane1)
                         .addContainerGap())
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(18, 18, 18)
-                        .addComponent(jButton1)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel3)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButton2))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jLabel2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jLabel1)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)
+                                .addComponent(jButton1)))
                         .addGap(0, 12, Short.MAX_VALUE))))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
-        jTextField2.setText("");
-    }//GEN-LAST:event_jTextField2ActionPerformed
-
-    private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
-        jTextField1.setText("");
-    }//GEN-LAST:event_jTextField1ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         String libro=jTextField2.getText();
@@ -127,22 +127,30 @@ public class Principal extends javax.swing.JFrame {
         jTextArea1.append(libro+"-Buscando\n");
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void jTextField2FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTextField2FocusGained
-        jTextField2.setText("");
-    }//GEN-LAST:event_jTextField2FocusGained
-
-    private void jTextField1FocusGained(java.awt.event.FocusEvent evt) {//GEN-FIRST:event_jTextField1FocusGained
-        jTextField2.setText("");
-    }//GEN-LAST:event_jTextField1FocusGained
+    private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
+        String libro = jTextField4.getText();
+        if(this.superior.libros.containsKey(libro)){
+            this.superior.pujas.remove(libro);
+            this.superior.libros.remove(libro);
+            this.superior.noDisponibles.remove(libro);
+            jTextArea1.setText(jTextArea1.getText().replace(libro+"-Pujando\n",""));
+            jTextArea1.setText(jTextArea1.getText().replace(libro+"-Puja perdida\n",""));
+            jTextArea1.setText(jTextArea1.getText().replace(libro+"-Buscando\n",""));
+            this.superior.salida.put(libro,null);
+        }
+    }//GEN-LAST:event_jButton2ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     public javax.swing.JButton jButton1;
+    public javax.swing.JButton jButton2;
     public javax.swing.JLabel jLabel1;
     public javax.swing.JLabel jLabel2;
+    public javax.swing.JLabel jLabel3;
     public javax.swing.JScrollPane jScrollPane1;
     public javax.swing.JTextArea jTextArea1;
     public javax.swing.JTextField jTextField1;
     public javax.swing.JTextField jTextField2;
     public javax.swing.JTextField jTextField3;
+    public javax.swing.JTextField jTextField4;
     // End of variables declaration//GEN-END:variables
 }

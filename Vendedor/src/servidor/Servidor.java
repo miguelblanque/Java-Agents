@@ -1,3 +1,4 @@
+
 import jade.core.AID;
 import jade.core.Agent;
 import jade.core.behaviours.CyclicBehaviour;
@@ -12,12 +13,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Servidor extends Agent {
+
     public HashMap<String, Puja> libros;
 
     protected void setup() {
-        System.out.println("Empezando el servidor");
-        libros = new HashMap<String,Puja>();
-        
+        GUIServer gui = new GUIServer(this);
+        gui.setVisible(true);
+        gui.setTitle("Vendedor");
+
+        System.out.println("Iniciando el servidor");
+        libros = new HashMap<String, Puja>();
+
         DFAgentDescription dfd = new DFAgentDescription();
         dfd.setName(getAID());
         ServiceDescription sd = new ServiceDescription();
@@ -30,13 +36,11 @@ public class Servidor extends Agent {
             fe.printStackTrace();
         }
 
-        libros.put("pfd", new Puja("pfd", 5));
-        
         System.out.println("Servidor subido a páginas amarillas");
 
         addBehaviour(new RespuestaConsulta());
         System.out.println("Añadido comportamiento");
-        
+
         addBehaviour(new TickerBehaviour(this, 10000) {
             protected void onTick() {
                 System.out.println("Empezamos un tick");
@@ -46,39 +50,48 @@ public class Servidor extends Agent {
                 }
 
                 MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REJECT_PROPOSAL);
+                MessageTemplate mt2 = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
                 while (bucle) {
                     ACLMessage msg = myAgent.receive(mt);
                     if (msg != null) {
                         String contenido[] = msg.getContent().split(";");
                         Puja aux = libros.get(contenido[0]);
                         aux.participantes.remove(msg.getSender());
-                        aux.ganador=aux.participantes.get(0);
+                        aux.ganador = aux.participantes.get(0);
                     } else {
                         bucle = false;
                     }
                 }
                 bucle = true;
 
-                mt = MessageTemplate.MatchPerformative(ACLMessage.PROPOSE);
                 while (bucle) {
-                    ACLMessage msg = myAgent.receive(mt);
+                    ACLMessage msg = myAgent.receive(mt2);
                     if (msg != null) {
                         String contenido[] = msg.getContent().split(";");
                         System.out.println("Apuesta de " + msg.getSender().getName()
                                 + " de " + contenido[1] + " para el libro " + contenido[0]);
                         Puja aux = libros.get(contenido[0]);
-                        int nVal = aux.precio + 1;
-                        if (aux.precio == Integer.parseInt(contenido[1])) {
-                            if (aux.participantes.size() == 0) {
-                                aux.ganador = msg.getSender();
+                        if (aux != null) {
+                            int nVal = aux.precio + 1;
+                            if (aux.precio == Integer.parseInt(contenido[1])) {
+                                if (aux.participantes.size() == 0) {
+                                    aux.ganador = msg.getSender();
+                                    System.out.println(aux.nombre);
+                                    gui.jTextArea1.setText(gui.jTextArea1.getText().replace(aux.nombre, aux.nombre + "-Pujando"));
+                                } else {
+                                    aux.precio = nVal;
+                                    ACLMessage respuesta = msg.createReply();
+                                    respuesta.setPerformative(ACLMessage.CFP);
+                                    respuesta.setContent(contenido[0] + ";" + String.valueOf(nVal));
+                                    myAgent.send(respuesta);
+                                }
+                                aux.participantes.add(msg.getSender());
                             } else {
-                                aux.precio=nVal;
                                 ACLMessage respuesta = msg.createReply();
-                                respuesta.setPerformative(ACLMessage.CFP);
-                                respuesta.setContent(contenido[0] + ";" + String.valueOf(nVal));
+                                respuesta.setPerformative(ACLMessage.REJECT_PROPOSAL);
+                                respuesta.setContent(contenido[0]);
                                 myAgent.send(respuesta);
                             }
-                            aux.participantes.add(msg.getSender());
                         } else {
                             ACLMessage respuesta = msg.createReply();
                             respuesta.setPerformative(ACLMessage.REJECT_PROPOSAL);
@@ -98,6 +111,7 @@ public class Servidor extends Agent {
                         libros.remove(key);
                         myAgent.send(ganador);
                         System.out.println("Mensajes a ganador mandado");
+                        gui.jTextArea1.setText(gui.jTextArea1.getText().replace(key+"-Pujando\n",""));
                     } else {
                         ACLMessage seguimos = new ACLMessage(ACLMessage.CFP);
                         seguimos.addReceiver(libros.get(key).ganador);
@@ -125,24 +139,28 @@ public class Servidor extends Agent {
 
         public void action() {
             MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
-            ACLMessage msg = myAgent.receive(mt);
-            if (msg != null) {
-                String libro = msg.getContent();
-                ACLMessage reply = msg.createReply();
+            boolean bucle = true;
+            while (bucle) {
+                ACLMessage msg = myAgent.receive(mt);
+                if (msg != null) {
+                    String libro = msg.getContent();
+                    ACLMessage reply = msg.createReply();
 
-                Puja subasta = libros.get(libro);
-                if (subasta != null) {
-                    reply.setPerformative(ACLMessage.CFP);
-                    reply.setContent(subasta.nombre+";"+String.valueOf(subasta.precio));
-                } else {
-                    reply.setPerformative(ACLMessage.REFUSE);
-                    reply.setContent("NULL");
+                    Puja subasta = libros.get(libro);
+                    if (subasta != null) {
+                        reply.setPerformative(ACLMessage.CFP);
+                        reply.setContent(subasta.nombre + ";" + String.valueOf(subasta.precio));
+                    } else {
+                        reply.setPerformative(ACLMessage.REFUSE);
+                        reply.setContent("NULL");
+                    }
+                    myAgent.send(reply);
+                    System.out.println("Se ha atendido a una consulta");
+                }else{
+                    bucle=false;
                 }
-                myAgent.send(reply);
-                System.out.println("Se ha atendido a una consulta");
-            } else {
-                block();
             }
+            block();
         }
     }
 }

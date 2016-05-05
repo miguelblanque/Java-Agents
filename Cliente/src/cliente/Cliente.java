@@ -12,24 +12,36 @@ import jade.lang.acl.MessageTemplate;
 import java.util.HashMap;
 
 public class Cliente extends Agent {
+
     public AID vendedor;
     public HashMap<String, Integer> libros;
     public HashMap<String, Integer> pujas;
     public HashMap<String, Integer> noDisponibles;
+    public HashMap<String, Integer> salida;
 
     public void setup() {
         Principal gui = new Principal(this);
         gui.setVisible(true);
+        gui.setTitle("Cliente");
 
         libros = new HashMap<String, Integer>();
         pujas = new HashMap<String, Integer>();
         noDisponibles = new HashMap<String, Integer>();
+        salida = new HashMap<String, Integer>();
 
         addBehaviour(new Buscador());
         System.out.println("Añadido primer comportamiento");
 
         addBehaviour(new TickerBehaviour(this, 10000) {
             protected void onTick() {
+                for (String key : salida.keySet()) {
+                    ACLMessage msg = new ACLMessage(ACLMessage.REJECT_PROPOSAL);
+                    msg.setSender(vendedor);
+                    msg.setContent(key);
+                    myAgent.send(msg);
+                    salida.remove(key);
+                }
+
                 MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REJECT_PROPOSAL);
                 boolean bucle = true;
                 while (bucle) {
@@ -75,21 +87,27 @@ public class Cliente extends Agent {
                     }
                 }
 
-                for (String key : pujas.keySet()) {
-                    if (pujas.get(key) <= libros.get(key)) {
-                        ACLMessage pujando = new ACLMessage(ACLMessage.PROPOSE);
-                        pujando.addReceiver(vendedor);
-                        pujando.setContent(key + ";" + pujas.get(key));
-                        myAgent.send(pujando);
+                try {
+                    for (String key : pujas.keySet()) {
+                        if (pujas.get(key) <= libros.get(key)) {
+                            ACLMessage pujando = new ACLMessage(ACLMessage.PROPOSE);
+                            pujando.addReceiver(vendedor);
+                            pujando.setContent(key + ";" + pujas.get(key));
+                            myAgent.send(pujando);
+                        } else {
+                            gui.jTextArea1.setText(gui.jTextArea1.getText().replace(key + "-Pujando", key + "-Puja insuficiente"));
+                            pujas.remove(key);
+                            libros.remove(key);
+                        }
                     }
-                }
+                } catch (NullPointerException a) {}
 
                 for (String key : noDisponibles.keySet()) {
                     ACLMessage busqueda = new ACLMessage(jade.lang.acl.ACLMessage.REQUEST);
                     busqueda.addReceiver(vendedor);
                     busqueda.setContent(key);
                     myAgent.send(busqueda);
-                    gui.jTextArea1.setText(gui.jTextArea1.getText().replace(key + "-Pujando", key + "-Puja Perdida"));
+                    //gui.jTextArea1.setText(gui.jTextArea1.getText().replace(key + "-Pujando", key + "-Puja Perdida"));
                     System.out.println("\t\t\tMensaje enviado para el libro: " + key);
                 }
             }
