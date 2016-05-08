@@ -1,7 +1,7 @@
 
 import jade.core.AID;
 import jade.core.Agent;
-import jade.core.behaviours.OneShotBehaviour;
+import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -119,7 +119,7 @@ public class Cliente extends Agent {
         System.out.println("AdiosCliente");
     }
 
-    public class Buscador extends OneShotBehaviour {
+    public class Buscador extends CyclicBehaviour {
 
         public void action() {
             DFAgentDescription template = new DFAgentDescription();
@@ -132,12 +132,14 @@ public class Cliente extends Agent {
                     vendedor = result[0].getName();
                 } else {
                     System.out.println("No hay subastadores");
-                    doDelete();
+                    block();
                 }
             } catch (FIPAException fe) {
                 fe.printStackTrace();
+                block();
             }
             System.out.println("Vendedor encontrado");
+            block();
         }
     }
 }
