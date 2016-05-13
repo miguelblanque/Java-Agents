@@ -12,11 +12,12 @@ import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 
 public class Cliente extends Agent {
+
     public AID vendedor;
-    public HashMap<String, Integer> libros;
-    public HashMap<String, Integer> pujas;
-    public HashMap<String, Integer> noDisponibles;
-    public HashMap<String, Integer> salida;
+    public HashMap<String, DataContainer> libros;
+    public HashMap<String, DataContainer> pujas;
+    public HashMap<String, DataContainer> noDisponibles;
+    public HashMap<String, DataContainer> salida;
 
     public void setup() {
         Principal gui = new Principal(this);
@@ -24,10 +25,10 @@ public class Cliente extends Agent {
         gui.setTitle("Cliente");
         vendedor = null;
 
-        libros = new HashMap<String, Integer>();
-        pujas = new HashMap<String, Integer>();
-        noDisponibles = new HashMap<String, Integer>();
-        salida = new HashMap<String, Integer>();
+        libros = new HashMap<String, DataContainer>();
+        pujas = new HashMap<String, DataContainer>();
+        noDisponibles = new HashMap<String, DataContainer>();
+        salida = new HashMap<String, DataContainer>();
 
         addBehaviour(new TickerBehaviour(this, 2000) {
             protected void onTick() {
@@ -48,13 +49,14 @@ public class Cliente extends Agent {
                         block();
                     }
                     block();
-
+                } else {
+                    block();
                 }
             }
         });
         System.out.println("Añadido primer comportamiento");
 
-        addBehaviour(new TickerBehaviour(this, 10000) {
+        addBehaviour(new TickerBehaviour(this, 5000) {
             @Override
             protected void onTick() {
                 if (vendedor != null) {
@@ -66,8 +68,21 @@ public class Cliente extends Agent {
                         salida.remove(key);
                     }
 
-                    MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REJECT_PROPOSAL);
+                    MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REFUSE);
                     boolean bucle = true;
+                    while (bucle) {
+                        ACLMessage msg = myAgent.receive(mt);
+                        if (msg != null) {
+                            System.out.println(msg.getContent());
+                            System.out.println("Hola");
+                            noDisponibles.get(msg.getContent()).flag=0;
+                        } else {
+                            bucle = false;
+                        }
+                    }
+
+                    mt = MessageTemplate.MatchPerformative(ACLMessage.REJECT_PROPOSAL);
+                    bucle = true;
                     while (bucle) {
                         ACLMessage msg = myAgent.receive(mt);
                         if (msg != null) {
@@ -99,9 +114,11 @@ public class Cliente extends Agent {
                         if (msg != null) {
                             String contenido[] = msg.getContent().split(";");
                             if (pujas.containsKey(contenido[0])) {
-                                pujas.replace(contenido[0], Integer.parseInt(contenido[1]));
+                                DataContainer a = new DataContainer(0, Integer.parseInt(contenido[1]));
+                                pujas.replace(contenido[0], a);
                             } else {
-                                pujas.put(contenido[0], Integer.parseInt(contenido[1]));
+                                DataContainer a = new DataContainer(0, (Integer.parseInt(contenido[1]) + 1));
+                                pujas.put(contenido[0], a);
                                 noDisponibles.remove(contenido[0]);
                                 gui.jTextArea1.setText(gui.jTextArea1.getText().replace(contenido[0] + "-Buscando", contenido[0] + "-Pujando"));
                                 System.out.println("\t\t\tEl siguiente libro está disponible: " + contenido[0]);
@@ -113,7 +130,7 @@ public class Cliente extends Agent {
 
                     try {
                         for (String key : pujas.keySet()) {
-                            if (pujas.get(key) <= libros.get(key)) {
+                            if (pujas.get(key).precio <= libros.get(key).precio) {
                                 ACLMessage pujando = new ACLMessage(ACLMessage.PROPOSE);
                                 pujando.addReceiver(vendedor);
                                 pujando.setContent(key + ";" + pujas.get(key));
@@ -128,18 +145,19 @@ public class Cliente extends Agent {
                     }
 
                     for (String key : noDisponibles.keySet()) {
-                        ACLMessage busqueda = new ACLMessage(jade.lang.acl.ACLMessage.REQUEST);
-                        busqueda.addReceiver(vendedor);
-                        busqueda.setContent(key);
-                        myAgent.send(busqueda);
+                        if (noDisponibles.get(key).flag == 0) {
+                            ACLMessage busqueda = new ACLMessage(jade.lang.acl.ACLMessage.REQUEST);
+                            busqueda.addReceiver(vendedor);
+                            busqueda.setContent(key);
+                            myAgent.send(busqueda);
+                            noDisponibles.get(key).flag = 1;
+                            System.out.println("\t\t\tMensaje enviado para el libro: " + key);
+                        }
                         //gui.jTextArea1.setText(gui.jTextArea1.getText().replace(key + "-Pujando", key + "-Puja Perdida"));
-                        System.out.println("\t\t\tMensaje enviado para el libro: " + key);
                     }
-
                 }
             }
         });
-        System.out.println("\t\t\tVamos a hacer el doDelete");
     }
 
     public void takeDown() {

@@ -126,9 +126,9 @@ public class Principal extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         String libro=jTextField2.getText();
-        int cantidad=Integer.parseInt(jTextField1.getText());
-        this.superior.libros.put(libro, cantidad);
-        this.superior.noDisponibles.put(libro, cantidad);
+        DataContainer a = new DataContainer(0,Integer.parseInt(jTextField1.getText()));
+        this.superior.libros.put(libro, a);
+        this.superior.noDisponibles.put(libro, a);
         jTextArea1.append(libro+"-Buscando\n");
     }//GEN-LAST:event_jButton1ActionPerformed
 

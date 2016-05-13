@@ -154,14 +154,10 @@ public class Servidor extends Agent {
                         Puja subasta = libros.get(libro);
                         if (subasta != null) {
                             reply.setPerformative(ACLMessage.CFP);
-                            if(subasta.participantes.isEmpty()){
-                                reply.setContent(subasta.nombre + ";" + String.valueOf(subasta.precio));
-                            }else{
-                                reply.setContent(subasta.nombre + ";" + String.valueOf(subasta.precio+1));
-                            }
+                            reply.setContent(subasta.nombre + ";" + String.valueOf(subasta.precio));
                         } else {
                             reply.setPerformative(ACLMessage.REFUSE);
-                            reply.setContent("NULL");
+                            reply.setContent(libro);
                         }
                         myAgent.send(reply);
                         System.out.println("Se ha atendido a una consulta");
