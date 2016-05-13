@@ -15,8 +15,10 @@ import java.util.HashMap;
 public class Servidor extends Agent {
 
     public HashMap<String, Puja> libros;
+    int i;
 
     protected void setup() {
+        i=0;
         GUIServer gui = new GUIServer(this);
         gui.setVisible(true);
         gui.setTitle("Vendedor");
@@ -76,8 +78,9 @@ public class Servidor extends Agent {
                             if (aux.precio == Integer.parseInt(contenido[1])) {
                                 if (aux.participantes.size() == 0) {
                                     aux.ganador = msg.getSender();
-                                    System.out.println(aux.nombre);
-                                    gui.jTextArea1.setText(gui.jTextArea1.getText().replace(aux.nombre, aux.nombre + "-Pujando"));
+                                    if(aux.ganador==null){
+                                        gui.jTextArea1.setText(gui.jTextArea1.getText().replace(aux.nombre, aux.nombre + "-Pujando"));                                        
+                                    }
                                 } else {
                                     aux.precio = nVal;
                                     ACLMessage respuesta = msg.createReply();
@@ -120,6 +123,7 @@ public class Servidor extends Agent {
                         myAgent.send(seguimos);
                     }
                 }
+                System.out.println("Acabamos un tick");
             }
         });
         System.out.println("Vamos a hacer el doDelete");
@@ -138,29 +142,37 @@ public class Servidor extends Agent {
     public class RespuestaConsulta extends CyclicBehaviour {
 
         public void action() {
-            MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
-            boolean bucle = true;
-            while (bucle) {
-                ACLMessage msg = myAgent.receive(mt);
-                if (msg != null) {
-                    String libro = msg.getContent();
-                    ACLMessage reply = msg.createReply();
+            if(i!=0){
+                MessageTemplate mt = MessageTemplate.MatchPerformative(ACLMessage.REQUEST);
+                boolean bucle = true;
+                while (bucle) {
+                    ACLMessage msg = myAgent.receive(mt);
+                    if (msg != null) {
+                        String libro = msg.getContent();
+                        ACLMessage reply = msg.createReply();
 
-                    Puja subasta = libros.get(libro);
-                    if (subasta != null) {
-                        reply.setPerformative(ACLMessage.CFP);
-                        reply.setContent(subasta.nombre + ";" + String.valueOf(subasta.precio));
-                    } else {
-                        reply.setPerformative(ACLMessage.REFUSE);
-                        reply.setContent("NULL");
+                        Puja subasta = libros.get(libro);
+                        if (subasta != null) {
+                            reply.setPerformative(ACLMessage.CFP);
+                            if(subasta.participantes.isEmpty()){
+                                reply.setContent(subasta.nombre + ";" + String.valueOf(subasta.precio));
+                            }else{
+                                reply.setContent(subasta.nombre + ";" + String.valueOf(subasta.precio+1));
+                            }
+                        } else {
+                            reply.setPerformative(ACLMessage.REFUSE);
+                            reply.setContent("NULL");
+                        }
+                        myAgent.send(reply);
+                        System.out.println("Se ha atendido a una consulta");
+                    }else{
+                        bucle=false;
                     }
-                    myAgent.send(reply);
-                    System.out.println("Se ha atendido a una consulta");
-                }else{
-                    bucle=false;
                 }
+                block();
+            }else{
+                i=1;
             }
-            block();
         }
     }
 }

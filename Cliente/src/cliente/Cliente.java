@@ -1,7 +1,6 @@
 
 import jade.core.AID;
 import jade.core.Agent;
-import jade.core.behaviours.CyclicBehaviour;
 import jade.core.behaviours.TickerBehaviour;
 import jade.domain.DFService;
 import jade.domain.FIPAAgentManagement.DFAgentDescription;
@@ -9,6 +8,7 @@ import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 
 public class Cliente extends Agent {
@@ -29,10 +29,33 @@ public class Cliente extends Agent {
         noDisponibles = new HashMap<String, Integer>();
         salida = new HashMap<String, Integer>();
 
-        addBehaviour(new Buscador());
+        addBehaviour(new TickerBehaviour(this, 2000) {
+            protected void onTick() {
+                if (vendedor == null) {
+                    DFAgentDescription template = new DFAgentDescription();
+                    ServiceDescription sd = new ServiceDescription();
+                    sd.setType("vendedor");
+                    template.addServices(sd);
+                    try {
+                        DFAgentDescription[] result = DFService.search(myAgent, template);
+                        if (result.length > 0) {
+                            vendedor = result[0].getName();
+                        } else {
+                            block();
+                        }
+                    } catch (FIPAException fe) {
+                        fe.printStackTrace();
+                        block();
+                    }
+                    block();
+
+                }
+            }
+        });
         System.out.println("Añadido primer comportamiento");
 
         addBehaviour(new TickerBehaviour(this, 10000) {
+            @Override
             protected void onTick() {
                 if (vendedor != null) {
                     for (String key : salida.keySet()) {
@@ -101,7 +124,7 @@ public class Cliente extends Agent {
                                 libros.remove(key);
                             }
                         }
-                    } catch (NullPointerException a) {
+                    } catch (ConcurrentModificationException a) {
                     }
 
                     for (String key : noDisponibles.keySet()) {
@@ -121,29 +144,5 @@ public class Cliente extends Agent {
 
     public void takeDown() {
         System.out.println("AdiosCliente");
-    }
-
-    public class Buscador extends CyclicBehaviour {
-
-        public void action() {
-            DFAgentDescription template = new DFAgentDescription();
-            ServiceDescription sd = new ServiceDescription();
-            sd.setType("vendedor");
-            template.addServices(sd);
-            try {
-                DFAgentDescription[] result = DFService.search(myAgent, template);
-                if (result.length>0) {
-                    vendedor = result[0].getName();
-                    System.out.println("Vendedor encontrado");
-                } else {
-                    System.out.println("No hay subastadores");
-                    block();
-                }
-            } catch (FIPAException fe) {
-                fe.printStackTrace();
-                block();
-            }
-            block();
-        }
     }
 }
